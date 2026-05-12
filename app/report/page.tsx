@@ -75,7 +75,7 @@ export default function ReportPage() {
         heightLeft -= pageHeight;
       }
 
-      pdf.save(`CRB-Report-${report.report_id || 'unknown'}.pdf`);
+      pdf.save(`CRB-Report-${report.advice || 'unknown'}.pdf`);
       toast.success('Report downloaded successfully');
     } catch (error) {
       toast.error('Failed to download PDF. Please try again.');
@@ -130,7 +130,7 @@ export default function ReportPage() {
               <h1 className="text-3xl sm:text-4xl font-bold mb-2">Credit Bureau Report</h1>
               <p className="text-muted-foreground flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Generated on {new Date(report.generated_at).toLocaleDateString('en-US', {
+                Generated on {new Date(report.generatedAt).toLocaleDateString('en-US', {
                   year: 'numeric', month: 'long', day: 'numeric',
                 })}
               </p>
@@ -165,7 +165,7 @@ export default function ReportPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-muted-foreground">Report ID</p>
-                  <p className="text-sm font-mono font-semibold">{report.report_id?.slice(0, 12)}</p>
+                  <p className="text-sm font-mono font-semibold">{report.reportId?.slice(0, 12)}</p>
                 </div>
               </div>
             </div>
@@ -222,7 +222,7 @@ export default function ReportPage() {
     <Badge 
       className="bg-green-600 hover:bg-green-700 text-white px-6 py-1.5 text-base font-semibold mb-4 shadow-sm"
     >
-      {report.score_category}
+      {report.scoreCategory}
     </Badge>
 
     <p className="text-center text-muted-foreground max-w-[280px] leading-relaxed px-4">
@@ -240,17 +240,17 @@ export default function ReportPage() {
                 <CardContent className="space-y-4">
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Full Name</p>
-                    <p className="font-semibold text-base">{report.personal_info?.fullName}</p>
+                    <p className="font-semibold text-base">{report.personalInfo?.fullName}</p>
                   </div>
                   <Separator />
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">ID Number</p>
-                    <p className="font-semibold">{report.personal_info?.idNumber}</p>
+                    <p className="font-semibold">{report.personalInfo?.idNumber}</p>
                   </div>
                   <Separator />
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Address</p>
-                    <p className="font-semibold">{report.personal_info?.address}</p>
+                    <p className="font-semibold">{report.personalInfo?.address}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -264,13 +264,13 @@ export default function ReportPage() {
                 <CardContent className="space-y-4">
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Reporting Agency</p>
-                    <p className="font-semibold text-sm">{report.credit_bureau}</p>
+                    <p className="font-semibold text-sm">{report.creditBureau}</p>
                   </div>
                   <Separator />
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Valid Until</p>
                     <p className="font-semibold">
-                      {new Date(report.expires_at).toLocaleDateString('en-US', {
+                      {new Date(report.expiresAt).toLocaleDateString('en-US', {
                         year: 'numeric', month: 'long', day: 'numeric',
                       })}
                     </p>
@@ -342,7 +342,7 @@ export default function ReportPage() {
                   </p>
                   <div className="mt-4 pt-4 border-t">
                     <p className="text-xs text-muted-foreground">
-                      Payment Reference: <span className="font-mono font-semibold">{report.payment_reference}</span>
+                      Payment Reference: <span className="font-mono font-semibold">{report.paymentReference}</span>
                     </p>
                   </div>
                 </div>
