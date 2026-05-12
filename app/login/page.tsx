@@ -19,7 +19,7 @@ import { Shield, Lock, CircleCheck as CheckCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const {  user } = useAuthStore();
+  const { setUser} = useAuthStore();
   const [loading, setLoading] = useState(false);
 
   const form = useForm<LoginFormData>({
@@ -42,13 +42,10 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
     try {
-      await loginUser(data.email, data.password);
+      const user = await loginUser(data.email, data.password);
+      setUser(user);
       toast.success('Welcome back!');
-          if (user?.paymentMade) {
       router.push('/dashboard');
-    }else{
-        router.push('/purpose');
-    }
     } catch (error: any) {
       toast.error(error.message || 'Login failed. Please check your credentials.');
     } finally {

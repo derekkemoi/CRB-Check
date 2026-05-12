@@ -47,7 +47,7 @@ export interface PaymentData {
   reference: string;
 }
 
-export interface CRBReport {
+export interface CRBReportAPI {
   report_id: string;
   user_id: string;
   generated_at: string;
@@ -71,4 +71,28 @@ export interface CRBReport {
   purpose?: string[];           // Optional, since it may be added later
   created_at?: string;
   updated_at?: string;
+}
+
+export interface CRBReport {
+  reportId: string;
+  userId: string;
+  generatedAt: string;
+  expiresAt: string;
+  country: string;
+  currency: string;
+  score: number;
+  scoreCategory: string;
+  scoreColor: string;
+  creditBureau: string;
+  banks: string[];
+  personalInfo: {
+    fullName: string;
+    idNumber: string;
+    address: string;
+  };
+  summary: string;
+  advice: string[];
+  disclaimer: string;
+  paymentReference: string;
+  purpose?: string[];
 }

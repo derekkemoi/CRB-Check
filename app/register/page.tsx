@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -14,7 +14,7 @@ import { registerSchema } from '@/lib/validations';
 import { registerUser } from '@/services/auth.service';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { RegisterFormData } from '@/types';
-import { Shield, Eye, EyeOff, Lock, CheckCircle2, Loader2 } from 'lucide-react';
+import { Shield, Eye, EyeOff, Lock, CircleCheck as CheckCircle2, Loader as Loader2 } from 'lucide-react';
 
 const countries = [
   'Kenya', 'Nigeria', 'Philippines', 'Brazil', 'United States', 'United Kingdom',
@@ -30,6 +30,7 @@ const getPasswordStrength = (password: string): { strength: 'weak' | 'medium' | 
   if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
   if (/\d/.test(password)) score++;
   if (/[^a-zA-Z0-9]/.test(password)) score++;
+
   if (score <= 2) return { strength: 'weak', color: 'bg-red-500', width: '33%' };
   if (score <= 3) return { strength: 'medium', color: 'bg-yellow-500', width: '66%' };
   return { strength: 'strong', color: 'bg-green-500', width: '100%' };
@@ -37,7 +38,7 @@ const getPasswordStrength = (password: string): { strength: 'weak' | 'medium' | 
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { user } = useAuthStore();           // ← Added
+  const { setUser } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -46,13 +47,6 @@ export default function RegisterPage() {
     color: 'bg-gray-300',
     width: '0%'
   });
-
-  // Redirect if user is already logged in
-//   useEffect(() => {
-//     if (user) {
-//       router.push('/dashboard');
-//     }
-//   }, [user, router]);
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -70,12 +64,16 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setLoading(true);
     try {
-      await registerUser(data);
+      const user = await registerUser(data);
+      setUser(user);
+
       toast.success('Account created successfully!', {
         description: 'Welcome to CRB Status Checker',
         icon: <CheckCircle2 className="h-5 w-5 text-green-600" />,
       });
+
       router.push('/purpose');
+
     } catch (error: any) {
       toast.error(error.message || 'Registration failed', {
         description: 'Please try again or use a different email',
@@ -103,6 +101,7 @@ export default function RegisterPage() {
               Secure registration takes less than 60 seconds
             </CardDescription>
           </CardHeader>
+
           <CardContent className="px-4 sm:px-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
@@ -134,6 +133,7 @@ export default function RegisterPage() {
                     )}
                   />
                 </div>
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -147,6 +147,7 @@ export default function RegisterPage() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="idNumber"
@@ -160,6 +161,7 @@ export default function RegisterPage() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="country"
@@ -184,6 +186,7 @@ export default function RegisterPage() {
                     </FormItem>
                   )}
                 />
+
                 {/* Password Fields */}
                 <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
                   <FormField
@@ -225,6 +228,7 @@ export default function RegisterPage() {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="confirmPassword"
@@ -253,6 +257,7 @@ export default function RegisterPage() {
                     )}
                   />
                 </div>
+
                 <Button
                   type="submit"
                   className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold h-12 text-base"
@@ -267,6 +272,7 @@ export default function RegisterPage() {
                     'Create Account & Continue'
                   )}
                 </Button>
+
                 <div className="pt-4 text-center text-sm text-muted-foreground">
                   Already have an account?{' '}
                   <Link href="/login" className="text-green-600 hover:underline font-semibold">
