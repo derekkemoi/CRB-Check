@@ -5,7 +5,6 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { Toaster } from 'sonner';
 import { Header } from '@/components/layout/header';
-import LimitedOfferBanner from '@/components/LimitedOfferBanner';
 import { AuthInitializer } from '@/components/providers/auth-initializer'; // ← New component
 
 const inter = Inter({ subsets: ['latin'] });
@@ -34,7 +33,6 @@ export default function RootLayout({
 
           <div className="flex min-h-screen flex-col">
             <Header />
-            <LimitedOfferBanner />
             <div className="flex-1 pt-[0px] sm:pt-[0px]">
               {children}
             </div>

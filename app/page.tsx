@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import LimitedOfferBanner from '@/components/LimitedOfferBanner';
 import { Shield, Zap, Lock, CheckCircle, FileText, Clock, TrendingUp, UserCheck, Search, FileCheck, Lightbulb, Star, ArrowRight, Users, Award, CreditCard } from 'lucide-react';
 import { BASE_PRICE_USD, BASE_PRICE_KES, CURRENCY_SYMBOLS } from '@/lib/constants';
 
@@ -25,7 +26,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
-
+<LimitedOfferBanner />
       <main className="flex-1">
         <section className="relative overflow-hidden py-16 sm:py-24 lg:py-32">
           <div className="absolute inset-0 bg-gradient-to-b from-green-50 dark:from-green-950/20 to-transparent" />
