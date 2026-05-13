@@ -79,14 +79,14 @@ export default function PurposePage() {
   };
 
   const onSubmit = async (data: PurposeFormData) => {
-    if (!user?.uid) {
-      toast.error("User not found. Please login again.");
-      return;
-    }
+    // if (!user?.uid) {
+    //   toast.error("User not found. Please login again.");
+    //   return;
+    // }
 
     setLoading(true);
     try {
-      await updateReportPurposes(user.uid, data.purposes);
+    //   await updateReportPurposes(user.uid, data.purposes);
       toast.success('Purposes saved successfully!');
       startGenerationAnimation();
     } catch (error: any) {

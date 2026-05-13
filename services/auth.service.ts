@@ -19,6 +19,8 @@ export const registerUser = async (data: RegisterFormData): Promise<User> => {
 
   const { user, session } = response.data.data;
 
+  console.log('Registered user:', user);
+
   localStorage.setItem('access_token', session.access_token);
   localStorage.setItem('refresh_token', session.refresh_token);
 
