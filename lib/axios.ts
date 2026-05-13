@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ||'http://127.0.0.1:54321/functions/v1/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ||'https://erevjiqibyoxketxmtcz.supabase.co/functions/v1/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE,
