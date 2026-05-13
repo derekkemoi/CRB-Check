@@ -5,7 +5,8 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { Toaster } from 'sonner';
 import { Header } from '@/components/layout/header';
-import { AuthInitializer } from '@/components/providers/auth-initializer'; // ← New component
+import { AuthInitializer } from '@/components/providers/auth-initializer';
+import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,6 +22,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Google Ads Tag */}
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17976840588"
+        />
+        <Script id="google-ads-tag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'AW-17976840588');
+          `}
+        </Script>
+      </head>
+
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
@@ -28,7 +46,6 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* Initialize Authentication */}
           <AuthInitializer />
 
           <div className="flex min-h-screen flex-col">
