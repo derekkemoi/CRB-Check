@@ -22,7 +22,6 @@ export default function LimitedOfferBanner() {
   const ctaRoute = useMemo(() => {
     if (loading) return '/register';
     if (!user) return '/register';
-    if (!user.purposes || user.purposes.length === 0) return '/purpose';
     if (!user.paymentMade) return '/payment';
     return '/dashboard';
   }, [user, loading]);
