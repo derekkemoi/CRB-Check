@@ -82,7 +82,7 @@ export default function LimitedOfferBanner() {
           <div className="flex-1 overflow-hidden">
             <div className="animate-marquee whitespace-nowrap">
               <span className="inline-block text-sm sm:text-base md:text-lg font-semibold text-gray-800 mx-4 sm:mx-8">
-                May Special: Get Your Full CRB Report for Only <span className="text-blue-600 font-bold">{offerPrice}</span> – Save 60%!
+                June Special: Get Your Full CRB Report for Only <span className="text-blue-600 font-bold">{offerPrice}</span> – Save 60%!
               </span>
               <span className="inline-block text-sm sm:text-base md:text-lg font-semibold text-gray-800 mx-4 sm:mx-8">
                 End of Q2 Deal: Complete Credit Report Just <span className="text-purple-600 font-bold">{offerPrice}</span> – Limited Time Only!
@@ -91,7 +91,7 @@ export default function LimitedOfferBanner() {
                 Spring into Success: Full CRB Status Check for Only <span className="text-blue-600 font-bold">{offerPrice}</span> – Don&apos;t Miss Out!
               </span>
               <span className="inline-block text-sm sm:text-base md:text-lg font-semibold text-gray-800 mx-4 sm:mx-8">
-                May Special: Get Your Full CRB Report for Only <span className="text-blue-600 font-bold">{offerPrice}</span> – Save 60%!
+                June Special: Get Your Full CRB Report for Only <span className="text-blue-600 font-bold">{offerPrice}</span> – Save 60%!
               </span>
             </div>
           </div>
