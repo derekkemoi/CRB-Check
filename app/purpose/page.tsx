@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,14 +7,27 @@ import { toast } from 'sonner';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { purposeSchema } from '@/lib/validations';
-import { useAuthStore } from '@/store/useAuthStore';
-import { updateReportPurposes } from '@/services/payment.service';
+import { generateReport } from '@/services/report.service';
 import type { PurposeFormData } from '@/types';
-import { Briefcase, Building, ShieldCheck, Home, Landmark, MoreHorizontal, CheckCircle2, Loader2 } from 'lucide-react';
+import {
+  Briefcase,
+  Building,
+  ShieldCheck,
+  Home,
+  Landmark,
+  MoreHorizontal,
+  CheckCircle2,
+  Loader2,
+} from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 const purposesList = [
   { id: 'employment', label: 'Employment', icon: Briefcase },
@@ -35,62 +48,85 @@ const loadingSteps = [
 
 export default function PurposePage() {
   const router = useRouter();
-  const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [showGeneratingDialog, setShowGeneratingDialog] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
 
+  const animationTimer = useRef<NodeJS.Timeout | null>(null);
+
   const form = useForm<PurposeFormData>({
     resolver: zodResolver(purposeSchema),
-    defaultValues: { purposes: [] },
+    defaultValues: {
+      purposes: [],
+    },
   });
 
   const selectedPurposes = form.watch('purposes') || [];
 
-  // Fake generation animation
   const startGenerationAnimation = () => {
     setShowGeneratingDialog(true);
     setProgress(0);
     setCurrentStep(0);
     setIsComplete(false);
 
-    const totalDuration = 6500;
+    const totalDuration = 12000;
     const interval = 80;
     let elapsed = 0;
 
-    const timer = setInterval(() => {
+    animationTimer.current = setInterval(() => {
       elapsed += interval;
-      const newProgress = Math.min(Math.floor((elapsed / totalDuration) * 100), 100);
+      const newProgress = Math.min(Math.floor((elapsed / totalDuration) * 90), 90);
       setProgress(newProgress);
 
-      const newStep = Math.min(Math.floor(elapsed / (totalDuration / loadingSteps.length)), loadingSteps.length - 1);
+      const newStep = Math.min(
+        Math.floor(elapsed / (totalDuration / loadingSteps.length)),
+        loadingSteps.length - 1
+      );
       setCurrentStep(newStep);
 
-      if (elapsed >= totalDuration) {
-        clearInterval(timer);
-        setIsComplete(true);
-        setTimeout(() => {
-          router.push('/payment');
-        }, 1200);
+      if (elapsed >= totalDuration && animationTimer.current) {
+        clearInterval(animationTimer.current);
       }
     }, interval);
   };
 
-  const onSubmit = async (data: PurposeFormData) => {
-    // if (!user?.uid) {
-    //   toast.error("User not found. Please login again.");
-    //   return;
-    // }
-
+  const onSubmit = async (_data: PurposeFormData) => {
     setLoading(true);
     try {
-    //   await updateReportPurposes(user.uid, data.purposes);
-      toast.success('Purposes saved successfully!');
       startGenerationAnimation();
+
+      const result = await generateReport();
+
+      // Clear animation
+      if (animationTimer.current) {
+        clearInterval(animationTimer.current);
+      }
+
+      setProgress(100);
+      setCurrentStep(loadingSteps.length - 1);
+      setIsComplete(true);
+
+      sessionStorage.setItem('current_report_id', result.reportId);
+
+      toast.success('Report generated successfully');
+
+      // Brief delay to show success state
+      setTimeout(() => {
+        router.push('/payment');
+      }, 1500);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save purposes');
+      if (animationTimer.current) {
+        clearInterval(animationTimer.current);
+      }
+      setShowGeneratingDialog(false);
+
+      toast.error(
+        error?.response?.data?.message ||
+        error.message ||
+        'Failed to generate report. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -109,7 +145,6 @@ export default function PurposePage() {
                 Select all that apply. This helps us tailor your report to your needs.
               </CardDescription>
             </CardHeader>
-
             <CardContent className="px-4 sm:px-6 pb-8">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -122,7 +157,6 @@ export default function PurposePage() {
                           {purposesList.map((purpose) => {
                             const Icon = purpose.icon;
                             const isSelected = selectedPurposes.includes(purpose.id);
-
                             return (
                               <div
                                 key={purpose.id}
@@ -172,10 +206,10 @@ export default function PurposePage() {
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Saving...
+                        Generating Report...
                       </>
                     ) : (
-                      'Continue to Payment'
+                      'Generate Report'
                     )}
                   </Button>
                 </form>
@@ -187,6 +221,11 @@ export default function PurposePage() {
         {/* Generating Dialog */}
         <Dialog open={showGeneratingDialog} onOpenChange={setShowGeneratingDialog}>
           <DialogContent className="sm:max-w-md" hideCloseButton>
+            <DialogTitle className="sr-only">Generating Credit Report</DialogTitle>
+            <DialogDescription className="sr-only">
+              Please wait while your credit report is being generated.
+            </DialogDescription>
+
             <div className="py-8 text-center space-y-6">
               {!isComplete ? (
                 <>

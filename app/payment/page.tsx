@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/store/useAuthStore';
-import { initiatePayment, getLatestReport } from '@/services/payment.service';
+import { initiatePayment } from '@/services/payment.service';
+import { fetchReport, type FetchReportResult } from '@/services/report.service';
 import { getCurrentUser } from '@/services/auth.service';
 import { getPriceByCountry } from '@/lib/price-utils';
 import { toast } from 'sonner';
-import { CheckCircle, CreditCard, Shield, Lock, Loader2, Users } from 'lucide-react';
+import { CheckCircle, CreditCard, Shield, Lock, Loader2 } from 'lucide-react';
 
 const purposeLabels: Record<string, string> = {
   employment: 'Employment Verification',
@@ -29,8 +30,9 @@ export default function PaymentPage() {
   const [userCountry, setUserCountry] = useState<string>('');
   const [priceInfo, setPriceInfo] = useState<ReturnType<typeof getPriceByCountry> | null>(null);
   const [hasReport, setHasReport] = useState(false);
+  const [reportResult, setReportResult] = useState<FetchReportResult | null>(null);
 
-  // Load user country and price
+  // Load user country, price, and check report status
   useEffect(() => {
     const loadUserData = async () => {
       if (!user) return;
@@ -42,22 +44,32 @@ export default function PaymentPage() {
           setUserCountry(country);
           setPriceInfo(getPriceByCountry(country));
 
-          // Check if user already has a report
+          // Check report status using the new service
           try {
-            await getLatestReport();
-            setHasReport(true);
-          } catch {
+            const result = await fetchReport();
+            setReportResult(result);
+            setHasReport(result.success);
+          } catch (err) {
             setHasReport(false);
+            setReportResult(null);
           }
         }
       } catch (error) {
         console.error('Error loading user data:', error);
         setPriceInfo(getPriceByCountry('Kenya'));
+        setHasReport(false);
       }
     };
 
     loadUserData();
   }, [user]);
+
+  // Redirect if user already has a report
+  useEffect(() => {
+    if (hasReport) {
+      router.push('/dashboard');
+    }
+  }, [hasReport, router]);
 
   const handlePayment = async () => {
     if (!user || !priceInfo) {
@@ -72,7 +84,7 @@ export default function PaymentPage() {
         user.email || '',
         priceInfo.amount,
         priceInfo.currency,
-        `${window.location.origin}/verify` // Optional callback URL
+        `${window.location.origin}/verify`
       );
 
       if (response.authorization_url) {
@@ -86,13 +98,6 @@ export default function PaymentPage() {
       setLoading(false);
     }
   };
-
-  // If user already has a paid report, redirect to dashboard
-  useEffect(() => {
-    if (hasReport) {
-      router.push('/dashboard');
-    }
-  }, [hasReport, router]);
 
   return (
     <ProtectedRoute>
@@ -121,7 +126,6 @@ export default function PaymentPage() {
                     MOST POPULAR
                   </Badge>
                 </div>
-
                 <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
                   <span className="text-xl font-semibold">CRB Report</span>
                   <div className="text-center sm:text-right">

@@ -7,34 +7,42 @@ import { getCurrencyFromCountry } from './currency.service';
 // =============================================
 // REGISTER USER
 // =============================================
-export const registerUser = async (data: RegisterFormData): Promise<User> => {
-  const response: AxiosResponse = await api.post('/auth/register', {
-    firstName: data.firstName,
-    secondName: data.secondName,
-    email: data.email,
-    idNumber: data.idNumber,
-    country: data.country,
-    password: data.password,
-  });
+export const registerUser = async (
+  data: RegisterFormData
+): Promise<User> => {
+  const response: AxiosResponse = await api.post(
+    '/auth/register',
+    {
+      firstName: data.firstName,
+      secondName: data.secondName,
+      email: data.email,
+      idNumber: data.idNumber,
+      country: data.country,
+      password: data.password,
+    }
+  );
 
-  const { user, session } = response.data.data;
+  const { session } = response.data.data;
 
-  console.log('Registered user:', user);
+  localStorage.setItem(
+    'access_token',
+    session.access_token
+  );
 
-  localStorage.setItem('access_token', session.access_token);
-  localStorage.setItem('refresh_token', session.refresh_token);
+  localStorage.setItem(
+    'refresh_token',
+    session.refresh_token
+  );
 
-  return {
-    uid: user.id,
-    email: user.email,
-    firstName: user.firstName,
-    secondName: user.secondName,
-    idNumber: data.idNumber,
-    country: data.country,
-    currency: getCurrencyFromCountry(data.country),
-    createdAt: new Date().toISOString(),
-    paymentMade: false,
-  };
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    throw new Error(
+      'Failed to load user profile'
+    );
+  }
+
+  return currentUser;
 };
 
 // =============================================
@@ -57,9 +65,9 @@ export const loginUser = async (email: string, password: string): Promise<User> 
     country: user.country || '',
     currency: getCurrencyFromCountry(user.country || ''),
     createdAt: user.createdAt || new Date().toISOString(),
-    paymentMade: user.paymentMade ?? false,
-    purposes: user.purposes,
-    crbReportId: user.crbReportId,
+    paymentMade: user.paymentStatus,
+   // purposes: user.purposes,
+    currentReportId: user.crbReportId,
   };
 };
 
@@ -84,11 +92,10 @@ export const getCurrentUser = async (): Promise<User | null> => {
       idNumber: u.idNumber || '',
       country: u.country || '',
       currency: getCurrencyFromCountry(u.country || ''),
-      paymentMade: u.paymentMade ?? false,
+      paymentMade: u.paymentStatus,
       createdAt: u.createdAt || new Date().toISOString(),
-      purposes: u.purposes,
-      crbReportId: u.crbReportId,
-      reportUrl: u.reportUrl,
+      //purposes: u.purposes,
+      currentReportId: u.crbReportId,
       reportGeneratedAt: u.reportGeneratedAt,
     };
   } catch {
@@ -117,8 +124,8 @@ export const updateProfile = async (
       currency: getCurrencyFromCountry(u.country || ''),
       paymentMade: u.paymentMade ?? false,
       createdAt: u.createdAt || new Date().toISOString(),
-      purposes: u.purposes,
-      crbReportId: u.crbReportId,
+      //purposes: u.purposes,
+      currentReportId: u.crbReportId,
     };
   } catch {
     return null;

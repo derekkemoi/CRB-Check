@@ -57,7 +57,7 @@ export default function Home() {
                   </div>
                   <div className="text-left">
                     <p className="font-semibold text-base text-gray-900 dark:text-gray-100">Check Blacklist Status</p>
-                    <p className="text-sm text-muted-foreground">Know if you're blacklisted from borrowing</p>
+                    <p className="text-sm text-muted-foreground">Know if you&apos;re blacklisted from borrowing</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border-2 border-blue-200 hover:border-blue-400 transition-colors">
@@ -448,7 +448,7 @@ export default function Home() {
                 <AccordionItem value="item-8">
                   <AccordionTrigger>How often should I check my credit report?</AccordionTrigger>
                   <AccordionContent>
-                    It's recommended to check your credit report at least once every 6 months to monitor your credit health, identify potential fraud, and address any issues before applying for credit.
+                    It&apos;s recommended to check your credit report at least once every 6 months to monitor your credit health, identify potential fraud, and address any issues before applying for credit.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -488,7 +488,7 @@ export default function Home() {
                 </AccordionItem>
 
                 <AccordionItem value="item-14">
-                  <AccordionTrigger>What if I've never had a loan or credit card?</AccordionTrigger>
+                  <AccordionTrigger>What if I&apos;ve never had a loan or credit card?</AccordionTrigger>
                   <AccordionContent>
                     If you have no credit history, your report will show limited information. However, you can still get a report confirming you have a clean record, which is useful for employment or rental applications.
                   </AccordionContent>
@@ -511,7 +511,7 @@ export default function Home() {
                 <AccordionItem value="item-17">
                   <AccordionTrigger>How long is the report valid?</AccordionTrigger>
                   <AccordionContent>
-                    Credit reports are typically valid for 30-90 days, depending on the requesting institution's requirements. Banks and employers usually accept reports issued within the last 30 days.
+                    Credit reports are typically valid for 30-90 days, depending on the requesting institution&apos;s requirements. Banks and employers usually accept reports issued within the last 30 days.
                   </AccordionContent>
                 </AccordionItem>
 

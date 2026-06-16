@@ -1,51 +1,74 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
 import { useAuthStore } from '@/store/useAuthStore';
-import { getLatestReport } from '@/services/payment.service';
+import { fetchReport, type FetchReportResult } from '@/services/report.service';
 import type { CRBReport } from '@/types';
-import { FileText, CreditCard, TrendingUp, ArrowRight, ShieldCheck, Calendar, RefreshCw, MapPin, User, BadgeCheck, Clock, ChartBar as BarChart3 } from 'lucide-react';
+import { 
+  FileText, CreditCard, ArrowRight, ShieldCheck, 
+  Calendar, RefreshCw, MapPin, User, BadgeCheck, Clock, 
+  BarChart3 
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { user, initializeAuth } = useAuthStore();
-  const [report, setReport] = useState<CRBReport | null>(null);
+
+  const [reportResult, setReportResult] = useState<FetchReportResult | null>(null);
   const [reportLoading, setReportLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    if (!user?.paymentMade) return;
-    setReportLoading(true);
-    getLatestReport()
-      .then(setReport)
-      .catch(() => {})
-      .finally(() => setReportLoading(false));
-  }, [user?.paymentMade]);
+  const report = reportResult?.success ? reportResult.report : null;
 
-const handleRefresh = async () => {
-  setRefreshing(true);
-  try {
-    await initializeAuth();
-    const freshUser = useAuthStore.getState().user;
-    console.log('Refreshed user:', freshUser);
-    if (freshUser?.paymentMade) {
-      const r = await getLatestReport().catch(() => null);
-      if (r) setReport(r);
+
+  useEffect(() => {
+    
+    if (!user?.paymentMade) return;
+
+
+    const loadReport = async () => {
+      setReportLoading(true);
+      try {
+        const result = await fetchReport();
+        setReportResult(result);
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to load report');
+      } finally {
+        setReportLoading(false);
+      }
+    };
+
+    loadReport();
+  }, [user, user?.paymentMade]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await initializeAuth();
+      
+      if (user?.paymentMade) {
+        const result = await fetchReport();
+        setReportResult(result);
+      }
+      toast.success('Dashboard refreshed');
+    } catch (err) {
+      toast.error('Failed to refresh dashboard');
+    } finally {
+      setRefreshing(false);
     }
-    toast.success('Dashboard refreshed');
-  } catch {
-    toast.error('Failed to refresh');
-  } finally {
-    setRefreshing(false);
-  }
-};
+  };
+
+  const handleGenerateReport = () => {
+    router.push('/purpose');
+  };
 
   const getInitials = () =>
     `${user?.firstName?.charAt(0) ?? ''}${user?.secondName?.charAt(0) ?? ''}`.toUpperCase() || 'U';
@@ -57,14 +80,12 @@ const handleRefresh = async () => {
     return { text: 'text-red-600', bg: 'bg-red-500', ring: 'ring-red-200' };
   };
 
-  const scoreColors = report ? getScoreColor(report.score) : null;
   const scorePercentage = report ? Math.round((report.score / 850) * 100) : 0;
 
   return (
     <ProtectedRoute>
       <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-950">
         <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-5xl">
-
           {/* Top bar */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -75,7 +96,9 @@ const handleRefresh = async () => {
               </Avatar>
               <div>
                 <p className="text-xs text-muted-foreground font-medium">Welcome back</p>
-                <h1 className="text-lg font-bold leading-tight">{user?.firstName} {user?.secondName}</h1>
+                <h1 className="text-lg font-bold leading-tight">
+                  {user?.firstName} {user?.secondName}
+                </h1>
               </div>
             </div>
             <Button
@@ -90,19 +113,21 @@ const handleRefresh = async () => {
             </Button>
           </div>
 
-          {/* Hero card — report score OR payment CTA */}
-          {user?.paymentMade ? (
+          {/* Hero card */}
+          {user?.paymentMade == 'paid' ? (
+
             reportLoading ? (
               <div className="rounded-2xl bg-white dark:bg-gray-900 border shadow-sm p-8 mb-6 animate-pulse">
                 <div className="h-6 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-4" />
                 <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-xl" />
               </div>
             ) : report ? (
+              // Has Report
               <div className="rounded-2xl bg-white dark:bg-gray-900 border shadow-sm overflow-hidden mb-6">
                 <div className="bg-gradient-to-br from-green-600 to-emerald-700 p-6 sm:p-8 text-white">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                     <div className="flex items-center gap-5">
-                      <div className={`relative flex-shrink-0 w-24 h-24`}>
+                      <div className="relative flex-shrink-0 w-24 h-24">
                         <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                           <circle cx="50" cy="50" r="42" strokeWidth="10" fill="none" className="stroke-white/20" />
                           <circle
@@ -135,39 +160,51 @@ const handleRefresh = async () => {
                         <ShieldCheck className="h-3.5 w-3.5 flex-shrink-0" />
                         <span>{report.creditBureau}</span>
                       </div>
-                      <div className="flex items-center gap-2 sm:justify-end">
-                        <BarChart3 className="h-3.5 w-3.5 flex-shrink-0" />
-                        <span>{report.banks?.length ?? 0} banks reporting</span>
-                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="p-4 sm:p-5 bg-white dark:bg-gray-900">
-                  <Button asChild className="w-full bg-green-600 hover:bg-green-700 h-11 font-semibold gap-2" size="lg">
-                    <Link href="/report">
-                      <FileText className="h-4 w-4" />
-                      View Full Report
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
+                <div className="p-4 sm:p-5 bg-white dark:bg-gray-900 flex flex-col sm:flex-row gap-3">
+                    <Button asChild className="flex-1 bg-green-600 hover:bg-green-700 h-11 font-semibold gap-2" size="lg">
+                        <Link href="/report">
+                        <FileText className="h-4 w-4" />
+                        View Full Report
+                        <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </Button>
+
+                    <Button 
+                        onClick={handleGenerateReport}
+                        variant="outline" 
+                        className="flex-1 h-11 font-semibold gap-2 border-green-600 text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
+                        size="lg"
+                    >
+                        <RefreshCw className="h-4 w-4" />
+                        Generate New Report
+                    </Button>
+                    </div>
               </div>
             ) : (
+              // Payment Made but No Report
               <div className="rounded-2xl bg-white dark:bg-gray-900 border shadow-sm p-8 mb-6 text-center space-y-4">
-                <div className="h-14 w-14 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto">
-                  <FileText className="h-7 w-7 text-green-600" />
+                <div className="h-14 w-14 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto">
+                  <FileText className="h-7 w-7 text-amber-600" />
                 </div>
                 <div>
-                  <p className="font-semibold text-lg">Preparing your report</p>
-                  <p className="text-muted-foreground text-sm mt-1">Your report will appear here shortly.</p>
+                  <p className="font-semibold text-lg">No Report Found</p>
+                  <p className="text-muted-foreground text-sm mt-1">
+                    {reportResult && !reportResult.success 
+                      ? reportResult.error 
+                      : 'Your report has not been generated yet.'}
+                  </p>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing}>
-                  <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                  Check again
+                <Button onClick={handleGenerateReport} className="bg-green-600 hover:bg-green-700">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Generate Report Now
                 </Button>
               </div>
             )
           ) : (
+            // Payment Not Made
             <div className="rounded-2xl bg-white dark:bg-gray-900 border shadow-sm overflow-hidden mb-6">
               <div className="bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 p-6 sm:p-8 text-white">
                 <div className="flex items-center gap-3 mb-4">
@@ -206,7 +243,7 @@ const handleRefresh = async () => {
               {
                 icon: <CreditCard className="h-4 w-4 text-blue-600" />,
                 label: 'Payment',
-                value: user?.paymentMade ? (
+                value: user?.paymentMade === 'paid' ? (
                   <span className="flex items-center gap-1 text-green-600 font-semibold text-sm">
                     <BadgeCheck className="h-4 w-4" /> Paid
                   </span>
@@ -225,7 +262,7 @@ const handleRefresh = async () => {
                   </span>
                 ) : (
                   <span className="text-muted-foreground text-sm font-medium">
-                    {user?.paymentMade ? 'Preparing...' : 'Not available'}
+                    {user?.paymentMade === 'paid' ? 'Not Generated' : 'Not available'}
                   </span>
                 ),
               },
@@ -236,10 +273,11 @@ const handleRefresh = async () => {
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground font-medium">{item.label}</p>
-                  {typeof item.value === 'string'
-                    ? <p className="font-semibold text-sm truncate">{item.value}</p>
-                    : <div className="mt-0.5">{item.value}</div>
-                  }
+                  {typeof item.value === 'string' ? (
+                    <p className="font-semibold text-sm truncate">{item.value}</p>
+                  ) : (
+                    <div className="mt-0.5">{item.value}</div>
+                  )}
                 </div>
               </div>
             ))}
@@ -271,7 +309,14 @@ const handleRefresh = async () => {
                   label: 'Make Payment',
                   desc: 'Complete payment to unlock your report',
                   href: '/payment',
-                  show: !user?.paymentMade,
+                  show: user?.paymentMade !== 'paid',
+                },
+                {
+                  icon: <RefreshCw className="h-5 w-5 text-gray-500" />,
+                  label: 'Generate Report',
+                  desc: 'Create a new credit report',
+                  href: '/purpose',
+                  show: user?.paymentMade && !report,
                 },
               ]
                 .filter((a) => a.show)
@@ -293,7 +338,6 @@ const handleRefresh = async () => {
                 ))}
             </div>
           </div>
-
         </main>
         <Footer />
       </div>

@@ -24,7 +24,7 @@ export default function VerifyPage() {
 
     const paymentReference = reference || trxref;
 
-    if (!paymentReference || !user?.uid) {
+    if (!paymentReference) {
       setStatus('failed');
       setMessage('Missing payment reference or user information.');
       return;
@@ -32,9 +32,9 @@ export default function VerifyPage() {
 
     const verify = async () => {
       try {
-        const result = await verifyPayment(paymentReference, user.uid);
-
-        if (result && result.report_id) {
+        const result = await verifyPayment(paymentReference);
+        console.log('Verification result:', result.paymentStatus);
+        if (result && result.paymentStatus === 'paid') {
           // Refresh user in store so paymentMade: true is reflected everywhere
           const updatedUser = await getCurrentUser();
           if (updatedUser) setUser(updatedUser);
@@ -57,7 +57,7 @@ export default function VerifyPage() {
     };
 
     verify();
-  }, [searchParams, user, router]);
+  }, [searchParams, user, router, setUser]);
 
   return (
     <ProtectedRoute>
