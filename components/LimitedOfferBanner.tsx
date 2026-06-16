@@ -76,7 +76,7 @@ export default function LimitedOfferBanner() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
           <div className="flex items-center gap-2 flex-shrink-0">
             <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 animate-pulse" />
-            <span className="text-xs sm:text-sm font-bold text-blue-600 uppercase tracking-wide">MAY DEAL</span>
+            <span className="text-xs sm:text-sm font-bold text-blue-600 uppercase tracking-wide">JUNE DEAL</span>
           </div>
 
           <div className="flex-1 overflow-hidden">
