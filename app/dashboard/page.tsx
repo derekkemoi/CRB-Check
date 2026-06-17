@@ -172,7 +172,7 @@ export default function DashboardPage() {
                         </Link>
                     </Button>
 
-                    <Button 
+                    {/* <Button 
                         onClick={handleGenerateReport}
                         variant="outline" 
                         className="flex-1 h-11 font-semibold gap-2 border-green-600 text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
@@ -180,7 +180,7 @@ export default function DashboardPage() {
                     >
                         <RefreshCw className="h-4 w-4" />
                         Generate New Report
-                    </Button>
+                    </Button> */}
                     </div>
               </div>
             ) : (
