@@ -97,8 +97,10 @@ export default function PurposePage() {
     try {
       startGenerationAnimation();
 
-      const result = await generateReport();
-
+      const [result] = await Promise.all([
+        generateReport(),
+        new Promise(resolve => setTimeout(resolve, 11500))
+        ]);
       // Clear animation
       if (animationTimer.current) {
         clearInterval(animationTimer.current);
