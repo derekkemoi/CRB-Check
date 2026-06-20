@@ -15,6 +15,8 @@ import { registerUser } from '@/services/auth.service';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { RegisterFormData } from '@/types';
 import { Shield, Eye, EyeOff, Lock, CircleCheck as CheckCircle2, Loader as Loader2 } from 'lucide-react';
+import { track } from '@/lib/meta-pixel'
+
 
 const countries = [
   'Kenya', 'Nigeria', 'Philippines', 'Brazil', 'United States', 'United Kingdom',
@@ -66,7 +68,7 @@ export default function RegisterPage() {
     try {
       const user = await registerUser(data);
       setUser(user);
-
+      track('CompleteRegistration')
       toast.success('Account created successfully!', {
         description: 'Welcome to CRB Status Checker',
         icon: <CheckCircle2 className="h-5 w-5 text-green-600" />,

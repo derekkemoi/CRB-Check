@@ -12,6 +12,7 @@ import { getCurrentUser } from '@/services/auth.service';
 import { getPriceByCountry } from '@/lib/price-utils';
 import { toast } from 'sonner';
 import { CheckCircle, CreditCard, Shield, Lock, Loader2 } from 'lucide-react';
+import { track } from '@/lib/meta-pixel'
 
 const purposeLabels: Record<string, string> = {
   employment: 'Employment Verification',
@@ -31,6 +32,12 @@ export default function PaymentPage() {
   const [priceInfo, setPriceInfo] = useState<ReturnType<typeof getPriceByCountry> | null>(null);
   const [hasReport, setHasReport] = useState(false);
   const [reportResult, setReportResult] = useState<FetchReportResult | null>(null);
+
+  useEffect(() => {
+    track('ViewContent', {
+      content_name: 'CRB Report'
+    })
+  }, [])
 
   // Load user country, price, and check report status
   useEffect(() => {
@@ -72,6 +79,7 @@ export default function PaymentPage() {
   }, [hasReport, router]);
 
   const handlePayment = async () => {
+    
     if (!user || !priceInfo) {
       toast.error("Missing user or pricing information");
       return;
@@ -86,6 +94,12 @@ export default function PaymentPage() {
         priceInfo.currency,
         `${window.location.origin}/verify`
       );
+
+      track('InitiateCheckout', {
+            value: priceInfo.amount,
+            currency: 'KES'
+        })
+
 
       if (response.authorization_url) {
         window.location.href = response.authorization_url;

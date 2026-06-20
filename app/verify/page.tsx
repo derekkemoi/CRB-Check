@@ -9,6 +9,7 @@ import { verifyPayment } from '@/services/payment.service';
 import { getCurrentUser } from '@/services/auth.service';
 import { CircleCheck as CheckCircle, Circle as XCircle, Loader as Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { track } from '@/lib/meta-pixel'
 
 export default function VerifyPage() {
   const router = useRouter();
@@ -39,6 +40,11 @@ export default function VerifyPage() {
           const updatedUser = await getCurrentUser();
           if (updatedUser) setUser(updatedUser);
 
+          track('Purchase', {
+            value: 200,
+            currency: 'KES'
+        })
+
           setStatus('success');
           setMessage('Your CRB Report has been successfully generated!');
 
@@ -57,7 +63,7 @@ export default function VerifyPage() {
     };
 
     verify();
-  }, [searchParams, user, router, setUser]);
+  }, [searchParams, router, setUser]);
 
   return (
     <ProtectedRoute>

@@ -3,6 +3,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import { MetaPixelRouteTracker } from '@/components/meta-pixel-route-tracker';
 import { Toaster } from 'sonner';
 import { Header } from '@/components/layout/header';
 import { AuthInitializer } from '@/components/providers/auth-initializer';
@@ -20,9 +21,31 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+    console.log("PIXEL ID:", process.env.NEXT_PUBLIC_META_PIXEL_ID)
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Meta Pixel Base Code */}
+        <Script
+        id="facebook-pixel"
+        strategy="afterInteractive"
+        >
+        {`
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}
+            (window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+
+            fbq('init', '1327502505651672');
+            fbq('track', 'PageView');
+        `}
+        </Script>
+
         {/* Google Ads Tag */}
         <Script
           async
@@ -40,12 +63,14 @@ export default function RootLayout({
       </head>
 
       <body className={inter.className}>
+    
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
+            <MetaPixelRouteTracker />
           <AuthInitializer />
 
           <div className="flex min-h-screen flex-col">
