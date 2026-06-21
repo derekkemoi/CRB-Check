@@ -1,5 +1,5 @@
-export const BASE_PRICE_USD = 1.54;
-export const USD_TO_KES_RATE = 130;
+export const BASE_PRICE_USD = 1.00;
+export const USD_TO_KES_RATE = 100;
 export const BASE_PRICE_KES = Math.floor(BASE_PRICE_USD * USD_TO_KES_RATE);
 
 export const EXCHANGE_RATE_API_URL = 'https://open.er-api.com/v6/latest/USD';
